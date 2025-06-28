@@ -8,3 +8,5 @@ mcstatus
 exaroton-scraper-playwright
 playwright
 python-dotenv
+python-aternos
+

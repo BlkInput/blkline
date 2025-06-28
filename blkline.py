@@ -71,8 +71,8 @@ async def on_ready():
     channel = bot.get_channel(CHANNEL_ID)
     if channel:
         embed = discord.Embed(
-            title="✅ Beebo has reloaded!",
-            description="We're Back <:pixelGUY:1368269152334123049>",
+            title="<:checkbox:1388586497984430160> BLKInput has reloaded!",
+            description="We're Back <:Premium:1388586503092961482>",
             color=0xb0c0ff
         )
         await channel.send(embed=embed)

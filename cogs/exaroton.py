@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from mcstatus import JavaServer
 from discord.ext.commands import cooldown, BucketType, Context
-from exaroton_scraper_playwright import get_live_status_playwright
+from .exaroton_scraper_playwright import get_live_status_playwright
 import json
 import time
 import requests
