@@ -115,7 +115,7 @@ class ExarotonCog(commands.Cog):
             motd = data.get("motd", {}).get("clean", [""])[0]
     
             if status_code == 2 and self.last_status != "online":
-                embed = discord.Embed(title="🟢 **Termite Server is ONLINE!**", color=0x462f80)
+                embed = discord.Embed(title="🟢 **Obscura Server is ONLINE!**", color=0x462f80)
                 embed.add_field(name="MOTD", value=motd or "Server Online", inline=False)
                 embed.add_field(name="Java IP", value=self.server_address, inline=False)
                 embed.add_field(name="Players", value=str(len(players)), inline=False)
@@ -397,7 +397,7 @@ class ExarotonCog(commands.Cog):
         motd, players, online, status_text, max_players, source = await self.fetch_server_status()
 
         embed = discord.Embed(
-            title="Termite Server Status",
+            title="Obscura Server Status",
             description=f"**MOTD:** `{motd}`",
             color=discord.Color.green() if online else discord.Color.red()
         )
@@ -466,7 +466,7 @@ class ExarotonCog(commands.Cog):
         credits = response.json().get("credits", 0.0)
         embed = discord.Embed(
             title="💳 Server Credit Balance",
-            description=f"You currently have **{credits:.2f}** Termite credits remaining.",
+            description=f"You currently have **{credits:.2f}** Obscura credits remaining.",
             color=0x3d5e8e
         )
         embed.set_footer(text="Keep it running <:beebo:1383282292478312519>")
@@ -710,7 +710,7 @@ class ExarotonCog(commands.Cog):
 
         embed = discord.Embed(
             title="Obscura MC Commands",
-            description="Commands for managing and supporting the Termite server.",
+            description="Commands for managing and supporting the Obscura server.",
             color=0x462f80
         )
 

@@ -1168,12 +1168,6 @@ async def log_dev_commands(ctx):
             await log_channel.send(f"🛠️ Command `{ctx.command}` used by **{ctx.author}** in #{ctx.channel}")
 
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-    await bot.process_commands(message)
-
 # Main async startup
 async def main():
     await bot.load_extension("cogs.challonge_cog")
