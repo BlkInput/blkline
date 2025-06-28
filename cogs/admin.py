@@ -7,7 +7,7 @@ import time
 
 EXAROTON_TOKEN = os.getenv("EXAROTON_TOKEN")
 EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
-GRAND_USER_ID = [448896936481652777, 858462569043722271]
+GRAND_USER_ID = [448896936481652777]
 cooldowns = {}
 COOLDOWN_SECONDS = 30
 
@@ -42,7 +42,7 @@ class AdminCog(commands.Cog):
             self.update_cooldown(user_id)
             return False
         elif self.is_on_cooldown(user_id):
-            await ctx.send("<:beebo:1383282292478312519> You're on cooldown. Try again soon.")
+            await ctx.send("You're on cooldown. Try again soon.")
             return True
         else:
             self.update_cooldown(user_id)
@@ -61,7 +61,7 @@ class AdminCog(commands.Cog):
         uptime = data["host"].get("uptime", 0)
         minutes = uptime // 60
         hours = minutes // 60
-        await ctx.send(f"<:beebo:1383282292478312519> Server has been online for **{hours}h {minutes % 60}m**.")
+        await ctx.send(f"Server has been online for **{hours}h {minutes % 60}m**.")
 
     @commands.command(name="projectedburn", aliases=["burnproject", "burner"])
     async def projected_burn(self, ctx):

@@ -39,7 +39,7 @@ class HelpCog(commands.Cog):
         cog_list = list(cog_map.items())
 
         for i, (cog, commands_dict) in enumerate(cog_list, start=1):
-            embed = discord.Embed(title="<:beebo:1383282292478312519> Command Reference", description=cog, color=0x5865F2)
+            embed = discord.Embed(title="Command Reference", description=cog, color=0x5865F2)
             for cmd, desc in commands_dict.items():
                 embed.add_field(name=cmd, value=desc, inline=False)
             embed.set_footer(text=f"Use !how to view pinpoint, exa and reward commands • Page {i}/{len(cog_list)}")

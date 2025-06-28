@@ -11,8 +11,8 @@ from datetime import datetime
 PIN_DATA_FILE = "data/pins.json"
 SUBMITTER_MAP = {
     "1": 448896936481652777,  # you
-    "2": 1234744521393307678, # vinny
-    "3": 587900974669103104   # lachie
+    "2": 1382042817467256983, # GhostFrame
+    "3": 424532190290771998   # Ezra
 }
 DEV_IDS = [448896936481652777]  # you
 

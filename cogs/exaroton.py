@@ -17,11 +17,11 @@ DATA_FILE = "data/exaroton_data.json"
 POOL_FILE = "data/exaroton_pool.json"
 DONOR_FILE = "data/exaroton_donations.json"
 donor_role_id = 1386101967297843270
-EXAROTON_TRUSTED = [448896936481652777, 546650815297880066, 858462569043722271]
-DEV_USER_ID = [546650815297880066, 448896936481652777, 424532190290771998, 858462569043722271]
+EXAROTON_TRUSTED = [448896936481652777, 858462569043722271]
+DEV_USER_ID = [448896936481652777, 424532190290771998]
 EXAROTON_TOKEN = os.getenv("EXAROTON_TOKEN")
 EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
-SERVER_ADDRESS="termite.exaroton.me"
+SERVER_ADDRESS="obscura.exaroton.me"
 CHECK_INTERVAL_HOURS = 3
 
 def load_data(filename):
@@ -71,7 +71,7 @@ class ServerControlView(discord.ui.View):
 
 DONORBOARD_COOLDOWN_SECONDS = 300  # 5 minutes
 last_donorboard_time = 0
-DEV_USER_IDS = [448896936481652777, 546650815297880066, 858462569043722271]
+DEV_USER_IDS = [448896936481652777, 546650815297880066]
 
 class DonateButton(discord.ui.View):
     def __init__(self, pool_code):
@@ -355,13 +355,13 @@ class ExarotonCog(commands.Cog):
 
         # ─── Embed Response ───
         embed = discord.Embed(
-            title="Termite Server Status",
+            title="Obscura Server Status",
             description=f"**MOTD:** {motd}",
             color=discord.Color.green() if online else discord.Color.red()
         )
         embed.add_field(
             name="Status",
-            value="🟢 Online" if online else "<:beebo:1383282292478312519> Offline",
+            value="🟢 Online" if online else "<:ban:1388586495643877406> Offline",
             inline=True
         )
         embed.add_field(
@@ -490,18 +490,18 @@ class ExarotonCog(commands.Cog):
             save_data(DONOR_FILE, donor_data)
 
             await ctx.send(
-                f"<:pixel_cake:1368264542064345108> Added **{amount:.2f}** credits to **{target.display_name}**'s donation total."
+                f"<:Premium:1388586503092961482> Added **{amount:.2f}** credits to **{target.display_name}**'s donation total."
             )
 
         except Exception as e:
-            await ctx.send(f"⚠️ Couldn't add donation: {e}")
+            await ctx.send(f"<:warning:1388586513000042516> Couldn't add donation: {e}")
 
     @adddonation.error
     async def adddonation_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("⚠️ You must name a user that exists and specify an amount, like `!grant @user 100`.")
+            await ctx.send("<:warning:1388586513000042516> You must name a user that exists and specify an amount, like `!grant @user 100`.")
         elif isinstance(error, commands.BadArgument):
-            await ctx.send("❌ Invalid input. Make sure you're naming a valid user and the amount is a number.")
+            await ctx.send("<:warning:1388586513000042516> Invalid input. Make sure you're naming a valid user and the amount is a number.")
 
     @commands.command()
     async def burn(self, ctx, hours: float = 1, ram: int = 10):
@@ -514,12 +514,12 @@ class ExarotonCog(commands.Cog):
         if ram > 0:
             hours_left = self.credit_balance / (rate_per_gb_hour * ram)
             days_left = hours_left / 24
-            lifespan = f"<:beebo:1383282292478312519> Estimated uptime left: **{hours_left:.1f}h** (~{days_left:.1f} days)"
+            lifespan = f"Estimated uptime left: **{hours_left:.1f}h** (~{days_left:.1f} days)"
         else:
-            lifespan = "⚠️ Invalid RAM config for burn estimate."
+            lifespan = "<:warning:1388586513000042516> Invalid RAM config for burn estimate."
 
         embed = discord.Embed(
-            title="🔥 Termite Burn Estimate",
+            title="🔥 Obscura Burn Estimate",
             description=f"Using **{ram}GB RAM**...",
             color=0x462f80
         )
@@ -537,12 +537,12 @@ class ExarotonCog(commands.Cog):
         response = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
 
         if response.status_code != 200:
-            await ctx.send("❌ Couldn't fetch server details.")
+            await ctx.send("<:warning:1388586513000042516> Couldn't fetch server details.")
             return
 
         server = response.json()
         if server.get("creditsPerHour") is None:
-            await ctx.send("⚠️ Server burn rate data is unavailable.")
+            await ctx.send("<:warning:1388586513000042516> Server burn rate data is unavailable.")
             return
 
         rate = server["creditsPerHour"]
@@ -594,9 +594,9 @@ class ExarotonCog(commands.Cog):
             donor_data[str(target.id)] = 0
             save_data(DONOR_FILE, donor_data)
     
-            await ctx.send(f"<:pixel_toast:1386118938714177649> Cleared **{target.display_name}**'s donation record.")
+            await ctx.send(f"Cleared **{target.display_name}**'s donation record.")
         except Exception as e:
-            await ctx.send(f"⚠️ Error resetting donation: {e}")
+            await ctx.send(f"<:warning:1388586513000042516> Error resetting donation: {e}")
 
 
     @commands.command()
@@ -638,7 +638,7 @@ class ExarotonCog(commands.Cog):
 
         time_started = data.get("timeStarted")
         if not time_started:
-            await ctx.send("⚠️ Server is not online or uptime not available.")
+            await ctx.send("<:warning:1388586513000042516> Server is not online or uptime not available.")
             return
 
         try:
@@ -649,10 +649,10 @@ class ExarotonCog(commands.Cog):
             minutes, _ = divmod(remainder, 60)
         except Exception as e:
             print(f"[Uptime Parsing Error]: {e}")
-            await ctx.send("⚠️ Something went wrong calculating uptime.")
+            await ctx.send("<:warning:1388586513000042516> Something went wrong calculating uptime.")
             return
 
-        await ctx.send(f"🕓 **Termite** has been online for **{hours}h {minutes}m**.")
+        await ctx.send(f"🕓 **Obscura** has been online for **{hours}h {minutes}m**.")
 
 
     async def handle_cooldown(self, ctx):
@@ -672,7 +672,7 @@ class ExarotonCog(commands.Cog):
         motd, players, online, status_text, max_players, source = await self.fetch_server_status()
 
         embed = discord.Embed(
-            title="<:beebo:1383282292478312519> Online Players",
+            title="Online Players",
             description="Nobody online." if not players else ", ".join(players),
             color=discord.Color.green() if online else discord.Color.red()
         )
@@ -709,7 +709,7 @@ class ExarotonCog(commands.Cog):
             return
 
         embed = discord.Embed(
-            title="<:beebo:1383282292478312519> Termite MC Commands",
+            title="Obscura MC Commands",
             description="Commands for managing and supporting the Termite server.",
             color=0x462f80
         )
@@ -735,7 +735,7 @@ class ExarotonCog(commands.Cog):
         )
 
         embed.add_field(
-            name="🔔 Status Pings",
+            name="<:noentry:1388586500756865126> Status Pings",
             value="Server alerts for online/offline run every 3 hours.\nNo command needed.",
             inline=False
         )

@@ -11,10 +11,10 @@ TIME_FILE = "data/mc_time.json"
 POOL_FILE = "data/credit_pool.json"
 PLAYTIME_FILE = "data/playtime_rewards.json"
 REWARD_HISTORY_FILE = "data/reward_history.json"
-DEV_USER_ID = [448896936481652777, 858462569043722271]
+DEV_USER_ID = [448896936481652777, 1382042817467256983]
 COOLDOWN_SECONDS = 60
 cooldowns = {}
-MC_LOG_CHANNEL_ID = 1387232069205233824
+MC_LOG_CHANNEL_ID = 1388594474531295242
 
 def load_json(file):
     if not os.path.exists(file):
@@ -96,7 +96,7 @@ class RewardsCog(commands.Cog):
     # -- Simulated Playtime Tracker --
     @tasks.loop(minutes=5)
     async def check_playtime(self):
-        online_players = ["Vinny", "Lachie", "Toast"]  # Replace with real data pull when Exaroton key is in
+        online_players = ["BlkLine", "GhostFrame", "Toast"]  # Replace with real data pull when Exaroton key is in
         now = datetime.utcnow()
 
         data = load_json(PLAYTIME_FILE)

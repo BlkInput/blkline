@@ -8,6 +8,7 @@ import random
 import json
 import requests
 import logging
+from discord import File
 from discord.ui import Button, View
 from discord.ext import commands, tasks
 from mcstatus import JavaServer
@@ -29,7 +30,7 @@ logging.basicConfig(
 
 def is_trusted():
     async def predicate(ctx: Context):
-        return any(role.id == 1366796508288127066 for role in ctx.author.roles)
+        return any(role.id == 1388601551349612695 for role in ctx.author.roles)
     return commands.check(predicate)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -43,16 +44,18 @@ EXAROTON_PASSWORD = os.getenv("EXAROTON_PASSWORD")
 EXAROTON_TOKEN = os.getenv("EXAROTON_TOKEN")
 EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
 exaroton_client = Exaroton(EXAROTON_TOKEN)
-ANNOUNCEMENT_CHANNEL_ID = 1383563592447557722
-GUILD_ID = 1046624035464810496
-STATUS_CHANNEL_ID = 1383563592447557722
-DEV_LOG_CHANNEL_ID = 1369314903701065768
+ANNOUNCEMENT_CHANNEL_ID = 1388591461326655528
+GUILD_ID = 1382041644743786526
+STATUS_CHANNEL_ID = 1388591461326655528
+DEV_LOG_CHANNEL_ID = 1388594474531295242
 SUGGESTIONS_FILE = "suggestions.json"
+STICKY_MESSAGE_ID_FILE = "stickymsg.json"
 MC_SERVER_PORT = int(os.getenv("MC_SERVER_PORT", 50430))
 MC_SERVER_IP = os.getenv("MC_SERVER_IP")
-DEV_USER_ID = [546650815297880066, 448896936481652777, 424532190290771998, 858462569043722271]
+DEV_USER_ID = [448896936481652777, 424532190290771998]
 COOLDOWN_SECONDS = 600
 cooldowns = {}  # Maps user_id to last suggestion timestamp
+STICKY_CHANNEL_ID = 1382059333352689754
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -167,8 +170,6 @@ async def mcserver_status(self, ctx):
     print(json.dumps(data, indent=2))
 
 
-
-
 @bot.command()
 async def listcommands(ctx):
     cmds = [cmd.name for cmd in bot.commands]
@@ -177,13 +178,13 @@ async def listcommands(ctx):
 @bot.command(aliases=["set", "setty"])
 async def setserver(ctx, new_address: str):
     author_id = ctx.author.id
-    if author_id not in [546650815297880066, 448896936481652777]:
-        await ctx.send("🚫 You don't have permission to update the server address.")
+    if author_id not in [424532190290771998, 448896936481652777]:
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to update the server address.")
         return
 
     if author_id == 448896936481652777:
         _apply_server_address(new_address)
-        await ctx.send(f"✅ Server address updated to `{new_address}`.")
+        await ctx.send(f"<:checkbox:1388586497984430160> Server address updated to `{new_address}`.")
         return
 
     class ConfirmView(View):
@@ -195,11 +196,11 @@ async def setserver(ctx, new_address: str):
         async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
             if interaction.user.id == 448896936481652777:
                 _apply_server_address(new_address)
-                await interaction.response.edit_message(content=f"✅ Approved by <@{interaction.user.id}>. Server address updated to `{new_address}`.", view=None)
+                await interaction.response.edit_message(content=f"<:checkbox:1388586497984430160> Approved by <@{interaction.user.id}>. Server address updated to `{new_address}`.", view=None)
                 self.result = True
                 self.stop()
             else:
-                await interaction.response.send_message("🚫 Only the owner can approve this action.", ephemeral=True)
+                await interaction.response.send_message("<:noentry:1388586500756865126> Only the owner can approve this action.", ephemeral=True)
 
         @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger)
         async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -208,7 +209,7 @@ async def setserver(ctx, new_address: str):
             self.stop()
 
     view = ConfirmView()
-    await ctx.send(f"⚠️ <@448896936481652777>, <@{author_id}> wants to set the server address to `{new_address}`.", view=view)
+    await ctx.send(f"<:warning:1388586513000042516> <@448896936481652777>, <@{author_id}> wants to set the server address to `{new_address}`.", view=view)
 
 def _apply_server_address(new_address):
     with open(".env", "r") as f:
@@ -221,13 +222,13 @@ def _apply_server_address(new_address):
                 f.write(line)
     load_dotenv(override=True)
 
-@bot.command(name="𝑩𝒆𝒆𝒃𝒐", aliases=["beebo", "ping"])
-async def beebo_ping(ctx):
+@bot.command(name="𝑩lkInput", aliases=["binput", "ping"])
+async def b_ping(ctx):
     start = time.perf_counter()
-    msg = await ctx.send("🏓 Pinging Beebo...")
+    msg = await ctx.send("🏓 Pinging BlackInput...")
     end = time.perf_counter()
     latency_ms = (end - start) * 1000
-    embed = discord.Embed(description="<:pixel_cake_blk:1368286757094949056> Did someone call for Beebo?", color=0xffefb0)
+    embed = discord.Embed(description="<:Premium:1388586503092961482> Calling for 𝑩", color=0xffefb0)
     embed.set_footer(text=f"Latency: {latency_ms:.2f} ms ({latency_ms/1000:.2f} sec)")
     await msg.edit(content=None, embed=embed)
 
@@ -285,8 +286,8 @@ async def version(ctx):
 
 @bot.command(aliases=["awake", "wakeserver"])
 async def startserver(ctx):
-    if 1366796508288127066 not in [role.id for role in ctx.author.roles]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+    if 1388603181168332840 not in [role.id for role in ctx.author.roles]:
+        await ctx.send("<:warning:1388586513000042516> You don't have permission to use this command.")
         return
 
     try:
@@ -302,12 +303,12 @@ async def startserver(ctx):
         myserver.start()
 
         embed = discord.Embed(title="Server Startup Initiated!", color=0xffd79f)
-        embed.add_field(name="Launching", value="Beebo has triggered Termite startup.", inline=False)
+        embed.add_field(name="Launching", value="𝑩 has triggered Obscura startup.", inline=False)
         embed.set_footer(text="Give it a minute. Queue times vary.")
         await ctx.send(embed=embed)
 
     except Exception as e:
-        await ctx.send(f"❌ Failed to start server: `{str(e)}`")
+        await ctx.send(f"<:ban:1388586495643877406> Failed to start server: `{str(e)}`")
 
 @bot.command(aliases=["offping", "cacaw"])
 @cooldown(1, 300, BucketType.channel)  # once every 5 minutes per channel
@@ -315,16 +316,16 @@ async def pingoffline(ctx):
     server = JavaServer.lookup(SERVER_ADDRESS)
     try:
         status = server.status()
-        await ctx.send("Termite is currently online — no need to ping the squad.")
+        await ctx.send("Obscura is currently online — no need to ping the squad.")
     except:
         embed = discord.Embed(title="**Heads Up! The Server Seems to Be Offline or Sleeping**", color=0xffd79f)
         embed.set_footer(text="Someone needs to hop in or start it manually.")
-        await ctx.send(content="<@&1368225900486721616>", embed=embed)
+        await ctx.send(content="<@&1388583752636043456>", embed=embed)
 
 @bot.command(aliases=["commitgit", "gitcommit", "gc"])
 async def commitcode(ctx, *, msg: str = None):
     if ctx.author.id not in DEV_USER_ID:
-        await ctx.send("🚫 You don't have permission to commit code.")
+        await ctx.send("<:warning:1388586513000042516> You don't have permission to commit code.")
         return
 
     if not msg:
@@ -341,7 +342,7 @@ async def commitcode(ctx, *, msg: str = None):
         subprocess.run(["git", "commit", "-m", msg], check=True)
 
         embed = discord.Embed(
-            title="✅ Git Commit Successful",
+            title="<:checkbox:1388586497984430160> Git Commit Successful",
             description=f"Committed with message:\n```{msg}```",
             color=discord.Color.green()
         )
@@ -353,7 +354,7 @@ async def commitcode(ctx, *, msg: str = None):
 @bot.command(aliases=["syncpush", "deploy"])
 async def pushcode(ctx, *, commit_msg="Updated from Beebo"):
     if ctx.author.id not in DEV_USER_ID:
-        await ctx.send("🚫 You don't have permission to push code.")
+        await ctx.send("<:ban:1388586495643877406> You don't have permission to push code.")
         return
 
     import subprocess
@@ -368,7 +369,7 @@ async def pushcode(ctx, *, commit_msg="Updated from Beebo"):
         subprocess.run(["git", "push", "origin", "main"], check=True)
 
         embed = discord.Embed(
-            title="✅ Code Pushed Successfully",
+            title="<:checkbox:1388586497984430160> Code Pushed Successfully",
             description=f"Commit message: `{commit_msg}`",
             color=discord.Color.green()
         )
@@ -376,7 +377,7 @@ async def pushcode(ctx, *, commit_msg="Updated from Beebo"):
 
     except subprocess.CalledProcessError as e:
         embed = discord.Embed(
-            title="❌ Git Operation Failed",
+            title="<:warning:1388586513000042516> Git Operation Failed",
             description=f"```{e}```",
             color=discord.Color.red()
         )
@@ -384,7 +385,7 @@ async def pushcode(ctx, *, commit_msg="Updated from Beebo"):
 
     except Exception as e:
         embed = discord.Embed(
-            title="❌ Unexpected Error",
+            title="<:warning:1388586513000042516> Unexpected Error",
             description=f"```{str(e)}```",
             color=discord.Color.red()
         )
@@ -418,7 +419,7 @@ async def cakecheck(ctx):
 
     unread_messages = f"{random.randint(3000, 9000):,}"
     embed = discord.Embed(
-        title="<:pixel_cake:1368264542064345108> Cake Status Scan",
+        title="Cake Status Scan",
         description=description,
         color=0xffaad4
     )
@@ -520,8 +521,8 @@ async def meowstarcheck(ctx):
 
 @bot.command(aliases=["talk", "broadcast", "bcast"])
 async def say(ctx, channel_input=None, *, message: str = None):
-    if 1366796508288127066 not in [role.id for role in ctx.author.roles]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+    if 1388601551349612695 not in [role.id for role in ctx.author.roles]:
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
 
     # Handle empty call
@@ -561,17 +562,17 @@ async def say(ctx, channel_input=None, *, message: str = None):
     try:
         embed = discord.Embed(description=message, color=0xb0c0ff)
         await target_channel.send(content=ROLE_TO_TAG, embed=embed)
-        await ctx.send(f"✅ Message sent to {target_channel.mention}")
+        await ctx.send(f"<:checkbox:1388586497984430160> Message sent to {target_channel.mention}")
     except discord.Forbidden:
-        await ctx.send("🚫 Bot lacks permission to send messages in that channel.")
+        await ctx.send("<:warning:1388586513000042516> Bot lacks permission to send messages in that channel.")
     except Exception as e:
-        await ctx.send("💥 Failed to send the message.")
+        await ctx.send("<:warning:1388586513000042516> Failed to send the message.")
         logging.exception(f"Error sending message to {target_channel.id}: {e}")
 
 @bot.command(aliases=["sp", "chat"])
 async def speak(ctx, channel_input=None, *, message: str = None):
-    if 1366796508288127066 not in [role.id for role in ctx.author.roles]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+    if 1388601551349612695 not in [role.id for role in ctx.author.roles]:
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
 
     # Handle empty call
@@ -611,25 +612,25 @@ async def speak(ctx, channel_input=None, *, message: str = None):
     try:
         embed = discord.Embed(description=message, color=0xb0c0ff)
         await target_channel.send(content="", embed=embed)
-        await ctx.send(f"✅ Message sent to {target_channel.mention}")
+        await ctx.send(f"<:checkbox:1388586497984430160> Message sent to {target_channel.mention}")
     except discord.Forbidden:
-        await ctx.send("🚫 Bot lacks permission to send messages in that channel.")
+        await ctx.send("<:noentry:1388586500756865126> Bot lacks permission to send messages in that channel.")
     except Exception as e:
-        await ctx.send("💥 Failed to send the message.")
+        await ctx.send("<:noentry:1388586500756865126> Failed to send the message.")
         logging.exception(f"Error sending message to {target_channel.id}: {e}")
 
 
 
 @bot.command(aliases=["rle"])
 async def reloadenv(ctx):
-    if ctx.author.id not in [546650815297880066, 448896936481652777]:
-        await ctx.send("🚫 You don't have permission to reload the environment.")
+    if ctx.author.id not in [424532190290771998, 448896936481652777]:
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to reload the environment.")
         return
 
     load_dotenv(override=True)
     embed = discord.Embed(
-        title="Environment Reloaded ✅",
-        description="Configuration has been reloaded from .env. Beebo's got the latest settings <:pixel_cake:1368264542064345108>.",
+        title="Environment Reloaded <:checkbox:1388586497984430160>",
+        description="Configuration has been reloaded from .env. 𝑩's got the latest settings.",
         color=0xb0c0ff
     )
     await ctx.send(embed=embed)
@@ -654,9 +655,9 @@ async def checkperms(ctx, channel_input: str = None):
                 missing.append("Embed")
 
             if missing:
-                report.append(f"❌ `{channel.name}`: Missing {', '.join(missing)}")
+                report.append(f"<:warning:1388586513000042516> `{channel.name}`: Missing {', '.join(missing)}")
             else:
-                report.append(f"✅ `{channel.name}`: All good")
+                report.append(f"<:checkbox:1388586497984430160> `{channel.name}`: All good")
 
         pages = [report[i:i + 20] for i in range(0, len(report), 20)]
         for page in pages:
@@ -676,7 +677,7 @@ async def checkperms(ctx, channel_input: str = None):
             channel = matches[0]
 
     if not channel:
-        await ctx.send("❌ Channel not found.")
+        await ctx.send("<:warning:1388586513000042516> Channel not found.")
         return
 
     perms = channel.permissions_for(ctx.guild.me)
@@ -689,10 +690,10 @@ async def checkperms(ctx, channel_input: str = None):
         missing.append("Embed Links")
 
     if not missing:
-        await ctx.send(f"✅ I have all necessary permissions in {channel.mention}.")
+        await ctx.send(f"<:checkbox:1388586497984430160> I have all necessary permissions in {channel.mention}.")
     else:
         await ctx.send(
-            f"⚠️ Missing permissions in {channel.mention}: {', '.join(missing)}"
+            f"<:warning:1388586513000042516> Missing permissions in {channel.mention}: {', '.join(missing)}"
         )
 
 @bot.command()
@@ -708,11 +709,11 @@ async def reload(ctx):
         try:
             subprocess.run(["/root/beebo/reload_beebo.sh"], check=True)
         except subprocess.CalledProcessError as e:
-            print(f"❌ Reload failed: {e}")
+            print(f"<:warning:1388586513000042516> Reload failed: {e}")
 
     embed = discord.Embed(
-        title="Restarting Beebo 🔁",
-        description="Pulling latest code and restarting. Back in a sec...<:pixelGUY:1368269152334123049>",
+        title="Restarting 𝑩 🔁",
+        description="Pulling latest code and restarting. Back in a sec...",
         color=0xb0c0ff
     )
     await ctx.send(embed=embed)
@@ -720,8 +721,8 @@ async def reload(ctx):
 
 @bot.command()
 async def gitstatus(ctx):
-    if ctx.author.id not in [546650815297880066, 448896936481652777]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+    if ctx.author.id not in [424532190290771998, 448896936481652777]:
+        await ctx.send("<:warning:1388586513000042516> You don't have permission to use this command.")
         return    
     import subprocess
     try:
@@ -732,24 +733,24 @@ async def gitstatus(ctx):
             text=True
         )
         if result.returncode != 0:
-            await ctx.send(f"❌ Git error:\n```{result.stderr}```")
+            await ctx.send(f"<:warning:1388586513000042516> Git error:\n```{result.stderr}```")
             return
 
         output = result.stdout.strip()
         if not output:
-            await ctx.send("✅ Working tree is clean.")
+            await ctx.send("<:checkbox:1388586497984430160> Working tree is clean.")
         else:
-            await ctx.send(f"⚠️ Uncommitted changes:\n```diff\n{output}```")
+            await ctx.send(f"<:warning:1388586513000042516> Uncommitted changes:\n```diff\n{output}```")
     except Exception as e:
-        await ctx.send(f"❌ Couldn't check Git status: {e}")
+        await ctx.send(f"<:warning:1388586513000042516> Couldn't check Git status: {e}")
 
 @bot.command(aliases=["debug", "commands"])
 async def debugstatus(ctx):
     if ctx.author.id not in [546650815297880066, 448896936481652777]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
 
-    embed = discord.Embed(title="🛠️ Beebo Debug Command List", color=0x462f80)
+    embed = discord.Embed(title="🛠️ 𝑩 Debug Command List", color=0x462f80)
     
     for cmd in bot.commands:
         aliases = ', '.join(cmd.aliases) if cmd.aliases else "None"
@@ -762,18 +763,18 @@ async def debugstatus(ctx):
     embed.set_footer(text="These are all currently loaded commands. Dev eyes only.")
     await ctx.send(embed=embed)
 
-@bot.command(aliases=["bhelp", "beebohelp"])
+@bot.command(aliases=["bhelp", "𝑩help"])
 async def help(ctx):
-    embed = discord.Embed(title="Beebo Command List", color=0xb0c0ff)
+    embed = discord.Embed(title="𝑩lackInput Command List", color=0xb0c0ff)
     embed.add_field(name="!status", value="Check if the Minecraft server is online and who's on.", inline=False)
     embed.add_field(name="!pingoffline / !offping", value="If the server is offline, alert the squad to start it.", inline=False)
-    embed.add_field(name="!startserver / !awake", value="Attempts to start the server using Exaroton (restricted to ☁️ �𝓿𝓲𝓼𝓬𝓵𝓸𝓾𝓭 role).", inline=False)
+    embed.add_field(name="!startserver / !awake", value="Attempts to start the server using Exaroton (restricted to ☁️ EXEC role).", inline=False)
     embed.add_field(name="!say / !talk / !bcast", value="Send a custom message with an embed and ping MCSquad (restricted).", inline=False)
-    embed.add_field(name="!suggest", value="Submit changes you'd like to see in 𝑩𝒆𝒆𝒃𝒐.", inline=False)
+    embed.add_field(name="!suggest", value="Submit changes you'd like to see in 𝑩.", inline=False)
     embed.add_field(name="!cakecheck, !viveracheck, !jennacheck, etc.", value="Check specific users' status in a fun way.", inline=False)
     embed.add_field(name="!reloadenv / !rle", value="Reloads the environment settings <:pixel_cake:1368264542064345108>. Restricted.", inline=False)
-    embed.add_field(name="!reload", value="Pulls latest code and restarts Beebo <:pixelGUY:1368269152334123049>. Restricted.", inline=False)
-    embed.add_field(name="!uptime / !upt", value="Shows how long Beebo has been running.", inline=False)
+    embed.add_field(name="!reload", value="Pulls latest code and restarts 𝑩. Restricted.", inline=False)
+    embed.add_field(name="!uptime / !upt", value="Shows how long 𝑩 has been running.", inline=False)
     embed.add_field(name="!version / !ver", value="Shows the latest commit hash from Git.", inline=False)
     embed.add_field(name="!setserver <address>", value="Request/update the Minecraft server address. Protected.", inline=False)
     embed.add_field(name="!help", value="You're looking at it.", inline=False)
@@ -792,8 +793,8 @@ async def daily_server_status():
 
 @bot.command()
 async def githelp(ctx):
-    if ctx.author.id not in [546650815297880066, 448896936481652777]:
-        await ctx.send("🚫 You don't have permission to use this command.")
+    if ctx.author.id not in [424532190290771998, 448896936481652777]:
+        await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
     
     embed = discord.Embed(title="💡 Git Cheat Sheet", color=0x462f80)
@@ -871,12 +872,12 @@ async def suggest(ctx, action=None, *, arg=None):
             embed.add_field(name="Channel", value=f"{ctx.channel.mention}", inline=False)
             embed.add_field(name="Suggestion", value=message, inline=False)
             embed.add_field(name="Submitted At", value=f"<t:{int(now)}:F>", inline=False)
-            embed.set_footer(text="Beebo Suggestion System", icon_url=ctx.author.display_avatar.url)
+            embed.set_footer(text="𝑩 Suggestion System", icon_url=ctx.author.display_avatar.url)
             await log_channel.send(embed=embed)
 
 
         confirmation = discord.Embed(
-            title="✅ Suggestion Received",
+            title="<:checkbox:1388586497984430160> Suggestion Received",
             description="Thanks for your input! Your suggestion has been logged.",
             color=discord.Color.green()
         )
@@ -945,7 +946,7 @@ async def suggest(ctx, action=None, *, arg=None):
     if action.lower() == "delete":
         if ctx.author.id not in DEV_USER_ID:
             embed = discord.Embed(
-                title="❌ Permission Denied",
+                title="<:noentry:1388586500756865126> Permission Denied",
                 description="Only devs can delete suggestions.",
                 color=discord.Color.red()
             )
@@ -954,7 +955,7 @@ async def suggest(ctx, action=None, *, arg=None):
 # Delete suggestion
     if action == "delete":
         if ctx.author.id not in DEV_USER_ID:
-            await ctx.send("🚫 Only devs can delete suggestions.")
+            await ctx.send("<:noentry:1388586500756865126> Only devs can delete suggestions.")
             return
 
         if not arg or not arg.isdigit():
@@ -984,9 +985,9 @@ if not os.path.exists(challenge_file):
 async def reloadcog(ctx, name: str):
     try:
         await bot.reload_extension(f"cogs.{name}")
-        await ctx.send(f"✅ Reloaded cog: `{name}`")
+        await ctx.send(f"<:checkbox:1388586497984430160> Reloaded cog: `{name}`")
     except Exception as e:
-        await ctx.send(f"❌ Failed to reload: `{e}`")
+        await ctx.send(f"<:warning:1388586513000042516> Failed to reload: `{e}`")
 
 @bot.command()
 async def explayers(ctx):
@@ -999,7 +1000,7 @@ async def explayers(ctx):
         else:
             await ctx.send("⚫ No players online.")
     except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
+        await ctx.send(f"<:warning:1388586513000042516> Error: {e}")
 
 @bot.command()
 async def exlog(ctx):
@@ -1010,7 +1011,7 @@ async def exlog(ctx):
             f.write(log)
         await ctx.send(file=File("latest.log"))
     except Exception as e:
-        await ctx.send(f"❌ Failed to fetch logs: {e}")
+        await ctx.send(f"<:warning:1388586513000042516> Failed to fetch logs: {e}")
 
 @bot.group(invoke_without_command=True)
 async def challenge(ctx):
@@ -1023,14 +1024,14 @@ async def start_challenge(ctx, *, name: str):
     data[name] = []
     with open(challenge_file, "w") as f:
         json.dump(data, f, indent=2)
-    await ctx.send(f"✅ Challenge **{name}** started!")
+    await ctx.send(f"<:checkbox:1388586497984430160> Challenge **{name}** started!")
 
 @challenge.command(name="submit")
 async def submit_challenge(ctx, *, proof: str):
     with open(challenge_file, "r") as f:
         data = json.load(f)
     if not data:
-        await ctx.send("⚠️ No active challenges.")
+        await ctx.send("<:warning:1388586513000042516> No active challenges.")
         return
     latest = list(data.keys())[-1]
     data[latest].append({
@@ -1040,14 +1041,14 @@ async def submit_challenge(ctx, *, proof: str):
     })
     with open(challenge_file, "w") as f:
         json.dump(data, f, indent=2)
-    await ctx.send(f"✅ Submission added to **{latest}**!")
+    await ctx.send(f"<:checkbox:1388586497984430160> Submission added to **{latest}**!")
 
 @challenge.command(name="leaderboard")
 async def challenge_leaderboard(ctx):
     with open(challenge_file, "r") as f:
         data = json.load(f)
     if not data:
-        await ctx.send("⚠️ No challenges found.")
+        await ctx.send("<:warning:1388586513000042516> No challenges found.")
         return
     latest = list(data.keys())[-1]
     entries = data[latest]
@@ -1057,7 +1058,7 @@ async def challenge_leaderboard(ctx):
         leaderboard[user] = leaderboard.get(user, 0) + 1
     sorted_lb = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
     desc = "\n".join([f"**{i+1}. {u}** — {c} entries" for i, (u, c) in enumerate(sorted_lb)])
-    embed = discord.Embed(title=f"🏆 {latest} Leaderboard", description=desc or "No entries yet.", color=0xffc300)
+    embed = discord.Embed(title=f"<:Premium:1388586503092961482> {latest} Leaderboard", description=desc or "No entries yet.", color=0xffc300)
     await ctx.send(embed=embed)
 
 @bot.command(aliases=["mcerror"])
@@ -1075,7 +1076,7 @@ async def versionfix(ctx):
 
 async def send_versionfix_embed(channel):
     embed = discord.Embed(
-        title="⚠️ Minecraft Version Mismatch?",
+        title="<:warning:1388586513000042516> Minecraft Version Mismatch?",
         description=(
             "Seeing `Incompatible client version` or `Server mainly supports 1.20.1`?\n\n"
             "**That means your game is too updated for the server.**\n"
@@ -1089,7 +1090,7 @@ async def send_versionfix_embed(channel):
         ),
         color=0xffc300
     )
-    embed.set_footer(text="Sticky version info provided by 𝑩𝒆𝒆𝒃𝒐.")
+    embed.set_footer(text="Sticky version info provided by 𝑩.")
     await channel.send(embed=embed)
 
 @tasks.loop(hours=6)
@@ -1119,8 +1120,8 @@ async def refresh_sticky_message():
         description="Instructions for JAVA users.",
         color=0x57C7FF
     )
-    embed.add_field(name="**🖥️ PC (Java Edition)**", value="`IP:` **termite.exaroton.me**\n`Port:` **14663**", inline=False)
-    embed.set_footer(text="Posted by 𝑩𝒆𝒆𝒃𝒐 • Updated regularly")
+    embed.add_field(name="**🖥️ PC (Java Edition)**", value="`IP:` **obscura.exaroton.me**\n`Port:` **59172**", inline=False)
+    embed.set_footer(text="Posted by 𝑩 • Updated regularly")
 
     new_msg = await channel.send(embed=embed)
     await new_msg.pin()
@@ -1182,6 +1183,7 @@ async def main():
     await bot.load_extension("cogs.utils")
     await bot.load_extension("cogs.helpcog")
     await bot.load_extension("cogs.admin")
+    await bot.load_extension("cogs.reason")
     await bot.start(TOKEN)
 
 asyncio.run(main())

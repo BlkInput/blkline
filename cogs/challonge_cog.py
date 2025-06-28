@@ -12,7 +12,7 @@ MATCH_HISTORY_FILE = "data/match_history.json"
 ARCHIVE_FILE = "data/archived_slugs.json"
 ALERT_CACHE = "data/alerted_matches.json"
 OPTOUT_FILE = "data/match_ping_optouts.json"
-LOG_CHANNEL_ID = 1366761199949054013
+LOG_CHANNEL_ID = 1388594474531295242
 
 def load_json(path):
     if not os.path.exists(path):
@@ -620,12 +620,12 @@ class ChallongeCog(commands.Cog):
         ]
 
         if not matches:
-            await ctx.send(f"<:beebo:1383282292478312519> No matches found for `{name_query}` in `{slug}`.")
+            await ctx.send(f"No matches found for `{name_query}` in `{slug}`.")
             return
 
         result_lines = [f"• `{name}` → `{pid}`" for name, pid in matches[:10]]
         msg = "\n".join(result_lines)
-        await ctx.send(f"<:beebo:1383282292478312519> **Matches found in `{slug}`:**\n{msg}")
+        await ctx.send(f"**Matches found in `{slug}`:**\n{msg}")
 
     @commands.command(aliases=["bracket", "view_bracket"])
     async def bracket_link(self, ctx, slug: str):
@@ -687,7 +687,7 @@ class ChallongeCog(commands.Cog):
     @commands.command(aliases=["tourneyhelp", "tourhelp", "thelp"])
     async def help_tourney(self, ctx):
         embed = discord.Embed(
-            title="<:beebo_:1383281762385531081> Tournament Commands Help",
+            title="Tournament Commands Help",
             description="All commands related to managing and playing in Challonge tournaments.",
             color=0x5865f2
         )
@@ -720,7 +720,7 @@ class ChallongeCog(commands.Cog):
         )
 
         embed.add_field(
-            name="<:beebo:1383282292478312519>👑 Dev-Only Commands",
+            name="<:settings:1388586507664883772> Dev-Only Commands",
             value=(
                 "`!bind <slug> <participant_id>`\n"
                 "`!drop <slug> <@user>` – Remove player from tourney\n"
