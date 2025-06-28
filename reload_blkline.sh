@@ -1,19 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-cd /root/beebo || exit
+# --- CONFIGURE THESE PATHS TO YOUR ENVIRONMENT ---
+BOT_DIR="/root/blkline"        # <- where blkline.py lives
+SERVICE_NAME="blkline.service" # <- your systemd unit name
 
-echo "📦 Checking for uncommitted changes..."
+cd "$BOT_DIR" || { echo "❌ Cannot cd to $BOT_DIR"; exit 1; }
 
+echo "🔍 Checking for uncommitted changes…"
 if [[ -n $(git status --porcelain) ]]; then
-  echo "📝 Uncommitted changes found. Committing as WIP..."
-  git add .
-  git commit -m "WIP: auto-commit before pull"
+  echo "⚠️  Uncommitted changes detected; stashing…"
+  git stash push -m "auto-stash before pull"
 else
   echo "✅ Working tree clean."
 fi
 
-echo "🔄 Pulling latest code from GitHub..."
-git pull origin main
+echo "🔄 Fetching latest from origin/main…"
+git fetch origin main
 
-echo "🚀 Restarting Beebo service..."
-systemctl restart beebo.service
+echo "🔀 Resetting to origin/main…"
+git reset --hard origin/main
+
+echo "📦 Installing/updating dependencies…"
+pip install -r requirements.txt
+
+echo "🚀 Restarting $SERVICE_NAME…"
+systemctl restart "$SERVICE_NAME"
+
+echo "✅ Reload complete."
