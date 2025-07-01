@@ -1,5 +1,3 @@
-# cogs/reason.py
-
 import re
 import os
 from dotenv import load_dotenv
@@ -101,20 +99,29 @@ class ArgumentDebuggerCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name='debugarg', aliases=['argdebug', 'logiccheck'], help='Analyze text for is→ought argument gaps')
+    @commands.command(name='debugarg', aliases=['argdebug', 'logiccheck'])
     async def debugarg(self, ctx: commands.Context, *, text: str):
+        """Analyze text for is→ought argument gaps."""
         dbg = ArgumentDebugger(text)
         embed = dbg.generate_report_embed(ctx.author)
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        # ensure other commands still process
-        await self.bot.process_commands(message)
+        # 1) Ignore bots
         if message.author.bot:
             return
 
-        if message.channel.name == TARGET_CHANNEL and len(message.content) > 50:
+        # 2) Ignore anything that looks like a command (prefix = "!")
+        if message.content.startswith(self.bot.command_prefix):
+            return
+
+        # 3) Only run in the TARGET_CHANNEL and on long messages
+        if (
+            isinstance(message.channel, discord.TextChannel)
+            and message.channel.name == TARGET_CHANNEL
+            and len(message.content) > 50
+        ):
             dbg = ArgumentDebugger(message.content)
             embed = dbg.generate_report_embed(message.author)
             await message.reply(embed=embed)

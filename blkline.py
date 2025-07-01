@@ -1178,6 +1178,7 @@ async def main():
     await bot.load_extension("cogs.helpcog")
     await bot.load_extension("cogs.admin")
     await bot.load_extension("cogs.reason")
+    await bot.load_extension("cogs.utility")
     await bot.start(TOKEN)
 
 asyncio.run(main())

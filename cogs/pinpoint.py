@@ -34,6 +34,11 @@ class PinPoint(commands.Cog):
     @commands.command(name="mark")
     async def mark(self, ctx, x: int, y_or_desc: str, z: int, *, description: str = None):
         """Mark a location with optional Y coordinate. Usage: !mark x y z desc OR !mark x desc z"""
+
+        required_role_id = 1388601551349612695
+        dev_ids = [448896936481652777, 923014434228690966]
+        if required_role_id not in [role.id for role in ctx.author.roles]:
+            return  # silent fail, no message, no log
         try:
             y = int(y_or_desc)
             desc = description
