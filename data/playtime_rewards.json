@@ -1,14 +1,14 @@
 {
     "BlkLine": {
-        "total_minutes": 3390,
-        "last_seen": "2025-07-01T05:53:21.277799"
+        "total_minutes": 4277,
+        "last_seen": "2025-07-01T21:31:39.421820"
     },
     "GhostFrame": {
-        "total_minutes": 3390,
-        "last_seen": "2025-07-01T05:53:21.277799"
+        "total_minutes": 4277,
+        "last_seen": "2025-07-01T21:31:39.421820"
     },
     "Toast": {
-        "total_minutes": 3390,
-        "last_seen": "2025-07-01T05:53:21.277799"
+        "total_minutes": 4277,
+        "last_seen": "2025-07-01T21:31:39.421820"
     }
 }

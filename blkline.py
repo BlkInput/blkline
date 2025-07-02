@@ -154,7 +154,7 @@ async def mcserver_status(self, ctx):
         player_count_str = "?"
 
     embed = discord.Embed(
-        title="<:beebo:1383282292478312519> Termite Server Status",
+        title="<:beebo:1383282292478312519> Obscura Server Status",
         description=f"**MOTD:** {motd}",
         color=discord.Color.green() if status_text.lower() == "online" else discord.Color.red()
     )
@@ -238,7 +238,7 @@ async def uptime(ctx):
     minutes, seconds = divmod(uptime_seconds, 60)
     hours, minutes = divmod(minutes, 60)
     embed = discord.Embed(
-        title="🕒 Beebo Uptime",
+        title="🕒 BlkLine Uptime",
         description=f"I've been alive for {hours}h {minutes}m {seconds}s",
         color=0xb0c0ff
     )
@@ -276,7 +276,7 @@ async def version(ctx):
     try:
         commit = subprocess.check_output(["git", "log", "-1", "--pretty=format:%h - %s"]).decode().strip()
         embed = discord.Embed(
-            title="📦 Beebo Version",
+            title="📦 BLKLine Version",
             description=f"`{commit}`",
             color=0xb0c0ff
         )
@@ -352,7 +352,7 @@ async def commitcode(ctx, *, msg: str = None):
         await ctx.send(f"❌ Commit failed:\n```{e}```")
 
 @bot.command(aliases=["syncpush", "deploy"])
-async def pushcode(ctx, *, commit_msg="Updated from Beebo"):
+async def pushcode(ctx, *, commit_msg="Updated from BlkLine"):
     if ctx.author.id not in DEV_USER_ID:
         await ctx.send("<:ban:1388586495643877406> You don't have permission to push code.")
         return
@@ -425,7 +425,7 @@ async def cakecheck(ctx):
     )
     embed.set_thumbnail(url="attachment://pixel_cake.png")
     embed.set_footer(text="Unread messages: 8,042. DMs: yes, but no.")
-    file = discord.File("/root/beebo/assets/pixel_cake.png", filename="pixel_cake.png")
+    file = discord.File("/root/blkline/assets/pixel_cake.png", filename="pixel_cake.png")
     await ctx.send(file=file, embed=embed)
 
 def get_presence_description(member, lines):
@@ -707,7 +707,7 @@ async def reload(ctx):
         await asyncio.sleep(2)
         import subprocess
         try:
-            subprocess.run(["/root/beebo/reload_beebo.sh"], check=True)
+            subprocess.run(["/root/blkline/reload_blkline.sh"], check=True)
         except subprocess.CalledProcessError as e:
             print(f"<:warning:1388586513000042516> Reload failed: {e}")
 
