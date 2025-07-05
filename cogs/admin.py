@@ -100,7 +100,7 @@ class AdminCog(commands.Cog):
     @commands.command(name="restartserver")
     async def restart_server(self, ctx):
         if ctx.author.id not in GRAND_USER_ID:
-            await ctx.send("🚫 You don't have permission to restart the server.")
+            await ctx.send("<:noentry:1388586500756865126> You don't have permission to restart the server.")
             return
 
         url = f"{EXAROTON_BASE}/{EXAROTON_SERVER_ID}/restart"
@@ -108,7 +108,7 @@ class AdminCog(commands.Cog):
         if response.status_code == 204:
             await ctx.send("🔄 Restarting the server...")
         else:
-            await ctx.send("❌ Failed to restart the server.")
+            await ctx.send("<:ban:1388586495643877406> Failed to restart the server.")
 
 async def setup(bot):
     await bot.add_cog(AdminCog(bot))

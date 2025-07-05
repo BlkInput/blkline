@@ -12,7 +12,7 @@ MATCH_HISTORY_FILE = "data/match_history.json"
 ARCHIVE_FILE = "data/archived_slugs.json"
 ALERT_CACHE = "data/alerted_matches.json"
 OPTOUT_FILE = "data/match_ping_optouts.json"
-LOG_CHANNEL_ID = 1388594474531295242
+LOG_CHANNEL_ID = 1390938867128860692
 
 def load_json(path):
     if not os.path.exists(path):
@@ -84,7 +84,7 @@ class ChallongeCog(commands.Cog):
         uid = str((member or ctx.author).id)
         scores = load_json(ELO_FILE)
         elo = scores.get(uid, 1000)
-        await ctx.send(f"📈 ELO for {member.display_name if member else ctx.author.display_name}: **{elo}** <:beebo:1383282292478312519>")
+        await ctx.send(f"📈 ELO for {member.display_name if member else ctx.author.display_name}: **{elo}** <:settings:1388586507664883772>")
 
     def update_elo(self, winner_id, loser_id, k=32):
         scores = load_json(ELO_FILE)
@@ -226,11 +226,11 @@ class ChallongeCog(commands.Cog):
                 matches.append(p["participant"])
 
         if not matches:
-            await ctx.send("❌ No likely participant matches found for your name. Ask an admin to add you manually. <:beebo_:1383281762385531081>")
+            await ctx.send("❌ No likely participant matches found for your name. Ask an admin to add you manually. <:settings:1388586507664883772>")
             return
         if len(matches) > 1:
             names = ", ".join(p["name"] for p in matches)
-            await ctx.send(f"⚠️ Multiple potential matches found: {names}. Be more specific or ask an admin. <:beebo_:1383281762385531081>")
+            await ctx.send(f"⚠️ Multiple potential matches found: {names}. Be more specific or ask an admin. <:settings:1388586507664883772>")
             return
 
         participant_id = str(matches[0]["id"])
@@ -240,7 +240,7 @@ class ChallongeCog(commands.Cog):
 
         save_json(MAP_FILE, tourney_map)
 
-        await ctx.send(f"✅ You’ve been registered to `{slug}` as `{matches[0]['name']}` (ID: {participant_id})! <:beebo:1383282292478312519>")
+        await ctx.send(f"✅ You’ve been registered to `{slug}` as `{matches[0]['name']}` (ID: {participant_id})! <:Premium:1388586503092961482>")
 
 
     @commands.command(aliases=["slugs", "tlist"])
@@ -299,14 +299,14 @@ class ChallongeCog(commands.Cog):
                 def __init__(self, uid):
                     super().__init__(timeout=None)
                     self.uid = uid
-                @discord.ui.button(label="<:beebo_:1383281762385531081> Opt Out of Pings", style=discord.ButtonStyle.danger)
+                @discord.ui.button(label="<:settings:1388586507664883772> Opt Out of Pings", style=discord.ButtonStyle.danger)
                 async def optout(self, interaction: discord.Interaction, button: Button):
                     if str(interaction.user.id) != self.uid:
                         await interaction.response.send_message("Not your button.", ephemeral=True)
                         return
                     optouts.setdefault(slug, []).append(self.uid)
                     save_json(OPTOUT_FILE, optouts)
-                    await interaction.response.send_message("You have opted out of match pings. <:beebo_:1383281762385531081>", ephemeral=True)
+                    await interaction.response.send_message("You have opted out of match pings. <:settings:1388586507664883772>", ephemeral=True)
 
             channel = guild.get_channel(LOG_CHANNEL_ID)
             if channel:
@@ -423,7 +423,7 @@ class ChallongeCog(commands.Cog):
         }
         save_json(PENDING_FILE, pending)
 
-        await ctx.send(f"📝 Match report submitted for review. Awaiting dev confirmation. <:beebo_:1383281762385531081>")
+        await ctx.send(f"📝 Match report submitted for review. Awaiting dev confirmation. <:settings:1388586507664883772>")
 
     @commands.command(aliases=["cr"])
     @commands.is_owner()
@@ -448,7 +448,7 @@ class ChallongeCog(commands.Cog):
         if status == 200:
             self.log_match(slug, report["winner_id"], report["loser_id"], str(match_id))
             self.update_elo(report["winner_id"], report["loser_id"])
-            await ctx.send(f"✅ Match `{match_id}` confirmed and recorded! <:beebo:1383282292478312519>")
+            await ctx.send(f"✅ Match `{match_id}` confirmed and recorded! <:Premium:1388586503092961482>")
             del slug_reports[str_match_id]
             if not slug_reports:
                 reports.pop(slug)
@@ -478,7 +478,7 @@ class ChallongeCog(commands.Cog):
 
         save_json("data/pending_reports.json", reports)
 
-        await ctx.send(f"🚫 <@{reporter_id}>, your match report for `{slug}` match `{match_id}` was **denied** by the tournament overlords. Try again or appeal with better vibes. <:beebo_:1383281762385531081>")
+        await ctx.send(f"<:noentry:1388586500756865126> <@{reporter_id}>, your match report for `{slug}` match `{match_id}` was **denied** by the tournament overlords. Try again or appeal with better vibes. <:settings:1388586507664883772>")
 
 
     @commands.command(aliases=["confres"])
@@ -560,7 +560,7 @@ class ChallongeCog(commands.Cog):
 
         if status != 200:
             errors = data.get("errors") or data
-            await ctx.send(f"❌ Couldn’t create tournament: `{errors}` <:beebo_:1383281762385531081>")
+            await ctx.send(f"<:noentry:1388586500756865126> Couldn’t create tournament: `{errors}` <:settings:1388586507664883772>")
             return
 
         # Auto-create entry in MAP_FILE
@@ -585,7 +585,7 @@ class ChallongeCog(commands.Cog):
             save_json(MAP_FILE, tourney_map)
 
         embed = discord.Embed(
-            title="<:beebo:1383282292478312519> Tournament Created!",
+            title="<:Premium:1388586503092961482> Tournament Created!",
             description=f"[{name}](https://challonge.com/{slug}) is live and ready.",
             color=0x00ff99
         )
@@ -610,7 +610,7 @@ class ChallongeCog(commands.Cog):
         """Search for participant IDs by name in a given tournament."""
         data, status = await self.request("GET", f"tournaments/{slug}/participants")
         if status != 200:
-            await ctx.send(f"<:beebo_:1383281762385531081> Couldn't fetch participants for `{slug}`: {data.get('errors') or data}")
+            await ctx.send(f"<:settings:1388586507664883772> Couldn't fetch participants for `{slug}`: {data.get('errors') or data}")
             return
 
         matches = [
@@ -635,12 +635,12 @@ class ChallongeCog(commands.Cog):
     async def tourney_info(self, ctx, slug: str):
         data, status = await self.request("GET", f"tournaments/{slug}")
         if status != 200:
-            await ctx.send(f"❌ Failed to fetch tournament: `{data.get('errors') or data}`")
+            await ctx.send(f"<:noentry:1388586500756865126> Failed to fetch tournament: `{data.get('errors') or data}`")
             return
 
         t = data["tournament"]
         embed = discord.Embed(
-            title=f"📘 {t['name']}",
+            title=f"<:ghostframe:1382050156131651635> {t['name']}",
             description=f"[View on Challonge](https://challonge.com/{slug})",
             color=0x7289da
         )
@@ -656,14 +656,14 @@ class ChallongeCog(commands.Cog):
     @commands.is_owner()
     async def purgebot(self, ctx, limit: int = 50, *, keyword: str = None):
         """
-        Delete Beebo's messages and your own command triggers (within limit).
+        Delete BlkLine's messages and your own command triggers (within limit).
         Optional: filter by keyword.
         Usage: !purgebot 50
                !purgebot 100 matches ready
         """
         def check(m):
             # Bot message OR your own command message
-            is_beebo_or_trigger = (
+            is_blk_or_trigger = (
                 m.author == ctx.bot.user or
                 (m.author == ctx.author and m.content.startswith(ctx.prefix))
             )
@@ -676,9 +676,9 @@ class ChallongeCog(commands.Cog):
                     or any(keyword.lower() in (f.value or "") for f in e.fields)
                     for e in m.embeds
                 ) if m.embeds else False
-                return is_beebo_or_trigger and (in_content or in_embed)
+                return is_blk_or_trigger and (in_content or in_embed)
     
-            return is_beebo_or_trigger
+            return is_blk_or_trigger
     
         deleted = await ctx.channel.purge(limit=limit, check=check)
         await ctx.send(f"🧽 Deleted {len(deleted)} bot/trigger messages.", delete_after=3)

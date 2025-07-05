@@ -11,10 +11,10 @@ TIME_FILE = "data/mc_time.json"
 POOL_FILE = "data/credit_pool.json"
 PLAYTIME_FILE = "data/playtime_rewards.json"
 REWARD_HISTORY_FILE = "data/reward_history.json"
-DEV_USER_ID = [448896936481652777, 1382042817467256983]
+DEV_USER_ID = [448896936481652777, 777345438495277076]
 COOLDOWN_SECONDS = 60
 cooldowns = {}
-MC_LOG_CHANNEL_ID = 1388594474531295242
+MC_LOG_CHANNEL_ID = 1390936792567382089
 
 def load_json(file):
     if not os.path.exists(file):

@@ -11,8 +11,10 @@ from datetime import datetime
 PIN_DATA_FILE = "data/pins.json"
 SUBMITTER_MAP = {
     "1": 448896936481652777,  # you
-    "2": 1382042817467256983, # GhostFrame
-    "3": 424532190290771998   # Ezra
+    "2": 777345438495277076, # Lex
+    "3": 1389591580494659597,   # Ally
+    "4": 1299139472616591493,   # Asht
+    "5": 1276777730762870837   # Addy
 }
 DEV_IDS = [448896936481652777]  # you
 
@@ -35,8 +37,8 @@ class PinPoint(commands.Cog):
     async def mark(self, ctx, x: int, y_or_desc: str, z: int, *, description: str = None):
         """Mark a location with optional Y coordinate. Usage: !mark x y z desc OR !mark x desc z"""
 
-        required_role_id = 1388601551349612695
-        dev_ids = [448896936481652777, 923014434228690966]
+        required_role_id = 1390935193958875136
+        dev_ids = [448896936481652777, 777345438495277076]
         if required_role_id not in [role.id for role in ctx.author.roles]:
             return  # silent fail, no message, no log
         try:
@@ -260,7 +262,7 @@ class PinPoint(commands.Cog):
     async def exportpins(self, ctx):
         pins = load_pins()
         if not pins:
-            await ctx.send("📭 No pins to export.")
+            await ctx.send("<:report:1388586505693302968> No pins to export.")
             return
 
         json_path = "/mnt/data/pin_export.json"
@@ -283,7 +285,7 @@ class PinPoint(commands.Cog):
                     pin["timestamp"]
                 ])
 
-        await ctx.send("📦 Pins exported:", files=[
+        await ctx.send("<:report:1388586505693302968> Pins exported:", files=[
             discord.File(json_path),
             discord.File(csv_path)
         ])

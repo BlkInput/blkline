@@ -25,7 +25,7 @@ class HelpCog(commands.Cog):
                 "!pooladd <amount>": "Admin: Add to server credit pool.",
                 "!devlinkmc <@user> <username>": "Dev-only: Force link a user.",
             },
-            "🖥️ Exaroton": {
+            "<:statistics:1388586510286192721> Exaroton": {
                 "!serverstatus": "Check server status (live uptime, queue, etc).",
                 "!burnstats": "View credit burn rate and project time remaining.",
                 "!credits": "Current Exaroton credit balance.",

@@ -8,7 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 
 # ─── Configuration ────────────────────────────────────────────────
-DEV_USER_IDS  = {448896936481652777, 424532190771998}
+DEV_USER_IDS  = {448896936481652777, 777345438495277076}
 SYNC_COOLDOWN = 60  # seconds between allowed syncs
 _last_sync    = 0
 VAULT_FILE    = "data/vault.json"

@@ -30,7 +30,7 @@ logging.basicConfig(
 
 def is_trusted():
     async def predicate(ctx: Context):
-        return any(role.id == 1388601551349612695 for role in ctx.author.roles)
+        return any(role.id == 1390940586336587827 for role in ctx.author.roles)
     return commands.check(predicate)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -46,16 +46,16 @@ EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
 exaroton_client = Exaroton(EXAROTON_TOKEN)
 ANNOUNCEMENT_CHANNEL_ID = 1388591461326655528
 GUILD_ID = 1382041644743786526
-STATUS_CHANNEL_ID = 1388591461326655528
+STATUS_CHANNEL_ID = 1390933575121109022
 DEV_LOG_CHANNEL_ID = 1388594474531295242
 SUGGESTIONS_FILE = "suggestions.json"
 STICKY_MESSAGE_ID_FILE = "stickymsg.json"
 MC_SERVER_PORT = int(os.getenv("MC_SERVER_PORT", 50430))
 MC_SERVER_IP = os.getenv("MC_SERVER_IP")
-DEV_USER_ID = [448896936481652777, 424532190290771998]
+DEV_USER_ID = [448896936481652777, 777345438495277076]
 COOLDOWN_SECONDS = 600
 cooldowns = {}  # Maps user_id to last suggestion timestamp
-STICKY_CHANNEL_ID = 1382059333352689754
+STICKY_CHANNEL_ID = 1390933575121109022
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -721,7 +721,7 @@ async def reload(ctx):
 
 @bot.command()
 async def gitstatus(ctx):
-    if ctx.author.id not in [424532190290771998, 448896936481652777]:
+    if ctx.author.id not in [777345438495277076, 448896936481652777]:
         await ctx.send("<:warning:1388586513000042516> You don't have permission to use this command.")
         return    
     import subprocess
@@ -746,7 +746,7 @@ async def gitstatus(ctx):
 
 @bot.command(aliases=["debug", "commands"])
 async def debugstatus(ctx):
-    if ctx.author.id not in [546650815297880066, 448896936481652777]:
+    if ctx.author.id not in [777345438495277076, 448896936481652777]:
         await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
 
@@ -793,7 +793,7 @@ async def daily_server_status():
 
 @bot.command()
 async def githelp(ctx):
-    if ctx.author.id not in [424532190290771998, 448896936481652777]:
+    if ctx.author.id not in [777345438495277076, 448896936481652777]:
         await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
     
