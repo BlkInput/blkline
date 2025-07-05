@@ -33,6 +33,12 @@ def _save_vault(data):
     with open(VAULT_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+def save_json(file, data):
+    import os, json
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    with open(file, "w") as f:
+        json.dump(data, f, indent=4)
+
 
 class UtilityCog(commands.Cog):
     """Hybrid `/sync` + `!sync`, simple key/value store and dispatch helper."""

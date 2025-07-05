@@ -156,7 +156,7 @@ class RewardsCog(commands.Cog):
             save_json(LINK_FILE, links)
             await ctx.send("❎ Your Minecraft link has been removed.")
         else:
-            await ctx.send("⚠️ You don't have a Minecraft account linked.")
+            await ctx.send("<:warning:1388586513000042516> You don't have a Minecraft account linked.")
 
     @commands.command(name="rewardhistory")
     async def rewardhistory(self, ctx):
@@ -234,7 +234,7 @@ class RewardsCog(commands.Cog):
                 # Optional logging
                 log_channel = self.bot.get_channel(MC_LOG_CHANNEL_ID)
                 if log_channel:
-                    embed = discord.Embed(title="⚠️ Link Attempt Blocked", color=discord.Color.red())
+                    embed = discord.Embed(title="<:warning:1388586513000042516> Link Attempt Blocked", color=discord.Color.red())
                     embed.add_field(name="Attempted Username", value=mc_username)
                     embed.add_field(name="By", value=f"{ctx.author} ({ctx.author.id})", inline=False)
                     embed.timestamp = datetime.utcnow()
@@ -245,7 +245,8 @@ class RewardsCog(commands.Cog):
         links[str(user_id)] = {
             "username": mc_username,
             "uuid": uuid,
-            "verified": False
+            "verified": False,
+            "link_channel": ctx.channel.id
         }
         save_json(LINK_FILE, links)
     
@@ -281,13 +282,27 @@ class RewardsCog(commands.Cog):
             return
     
         if links[user_id].get("verified", False):
-            await ctx.send("✅ This user is already verified.")
+            await ctx.send("<:checkbox:1388586497984430160> This user is already verified.")
             return
     
         links[user_id]["verified"] = True
         save_json(LINK_FILE, links)
+        # Ping the user in the channel where they linked (if possible)
+        channel_id = links[user_id].get("link_channel")
+        link_channel = self.bot.get_channel(channel_id) if channel_id else None
+
+        if link_channel:
+            await link_channel.send(
+                f"<:checkbox:1388586497984430160> {member.mention}, your Minecraft account has been verified! You’re all set to play. 🎮🧱"
+            )
+        else:
+            await ctx.send(f"<:checkbox:1388586497984430160> {member.mention} has been verified, but I couldn't find the original link channel to ping them.")
+
+        # 🧼 Clean up the link_channel from their record — no longer needed
+        links[user_id].pop("link_channel", None)
+        save_json(LINK_FILE, links)
     
-        await ctx.send(f"✅ Verified **{member.display_name}**'s Minecraft link.")
+        await ctx.send(f"<:checkbox:1388586497984430160> Verified **{member.display_name}**'s Minecraft link.")
     
         log_channel = self.bot.get_channel(MC_LOG_CHANNEL_ID)
         if log_channel:
@@ -409,9 +424,30 @@ class RewardsCog(commands.Cog):
     # -- Pool Credits Check --
     @commands.command(name="pool", aliases=["creditpool", "donorpool"])
     async def credit_pool(self, ctx):
-        pool = load_json(POOL_FILE)
-        balance = pool.get("credits", 0.0)
-        await ctx.send(f"💰 Current server credit pool balance: **{balance:.2f}** credits.")
+        pool_data = load_json(POOL_FILE)
+        pool_code = pool_data.get("pool")
+        if not pool_code:
+            await ctx.send("<:warning:1388586513000042516> No pool code has been set. Use `!setpool <code>`.")
+            return
+
+        try:
+            response = requests.get(f"https://exaroton.com/pools/{pool_code}")
+            if response.status_code != 200:
+                await ctx.send("❌ Could not fetch pool data from Exaroton.")
+                return
+
+            # Cheeky scrape of the balance from HTML
+            import re
+            match = re.search(r'(\d+\.\d+)\s*credits?', response.text)
+            if match:
+                balance = float(match.group(1))
+                await ctx.send(f"💰 Current server credit pool balance: **{balance:.2f}** credits.")
+            else:
+                await ctx.send("❌ Couldn't find a credit balance on the page.")
+
+        except Exception as e:
+            await ctx.send(f"<:warning:1388586513000042516> Error checking pool balance: `{e}`")
+
 
 async def setup(bot):
     await bot.add_cog(RewardsCog(bot))
