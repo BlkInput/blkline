@@ -320,7 +320,7 @@ async def pingoffline(ctx):
     except:
         embed = discord.Embed(title="**Heads Up! The Server Seems to Be Offline or Sleeping**", color=0xffd79f)
         embed.set_footer(text="Someone needs to hop in or start it manually.")
-        await ctx.send(content="<@&1388583752636043456>", embed=embed)
+        await ctx.send(content="<@&1390934094602571857>", embed=embed)
 
 @bot.command(aliases=["commitgit", "gitcommit", "gc"])
 async def commitcode(ctx, *, msg: str = None):
