@@ -78,7 +78,7 @@ async def on_ready():
         await channel.send(embed=embed)
     check_server_status.start()
 
-@tasks.loop(hours=3)
+@tasks.loop(hours=6)
 async def check_server_status():
     global last_status
     channel = bot.get_channel(CHANNEL_ID)
@@ -88,14 +88,14 @@ async def check_server_status():
         status = server.status()
         if last_status == "offline":
             embed = discord.Embed(title="**Minecraft Server is ONLINE!**", color=0xb0c0ff)
-            embed.add_field(name="Java IP", value="termite.exaroton.me", inline=False)
+            embed.add_field(name="Java IP", value="obscura.exaroton.me", inline=False)
             embed.add_field(name="Players", value=f"{status.players.online}/{status.players.max}", inline=False)
 
             if status.players.online > 0:
                 players = ', '.join([player.name for player in status.players.sample]) if status.players.sample else "Unknown players"
                 embed.add_field(name="Who's Online", value=players, inline=False)
 
-            embed.set_footer(text="Summon the squad before Termite falls asleep.")
+            embed.set_footer(text="Summon the peeps before Obscure falls asleep.")
             await channel.send(content=ROLE_TO_TAG, embed=embed)
             last_status = "online"
         else:
@@ -103,7 +103,7 @@ async def check_server_status():
     except:
         print("Server is offline or unreachable.")
         if last_status == "online":
-            embed = discord.Embed(title="**Termite is OFFLINE or SLEEPING**", color=0xff5555)
+            embed = discord.Embed(title="**Obscura is OFFLINE or SLEEPING**", color=0xff5555)
             embed.set_footer(text="Someone needs to manually start it or join to wake it up.")
             await channel.send(content="<@&1368225900486721616>", embed=embed)
         last_status = "offline"
@@ -767,7 +767,7 @@ async def debugstatus(ctx):
 async def help(ctx):
     embed = discord.Embed(title="𝑩lackInput Command List", color=0xb0c0ff)
     embed.add_field(name="!status", value="Check if the Minecraft server is online and who's on.", inline=False)
-    embed.add_field(name="!pingoffline / !offping", value="If the server is offline, alert the squad to start it.", inline=False)
+    embed.add_field(name="!pingoffline / !offping", value="If the server is offline, alert the buttheads to start it.", inline=False)
     embed.add_field(name="!startserver / !awake", value="Attempts to start the server using Exaroton (restricted to ☁️ EXEC role).", inline=False)
     embed.add_field(name="!say / !talk / !bcast", value="Send a custom message with an embed and ping MCSquad (restricted).", inline=False)
     embed.add_field(name="!suggest", value="Submit changes you'd like to see in 𝑩.", inline=False)
@@ -778,7 +778,7 @@ async def help(ctx):
     embed.add_field(name="!version / !ver", value="Shows the latest commit hash from Git.", inline=False)
     embed.add_field(name="!setserver <address>", value="Request/update the Minecraft server address. Protected.", inline=False)
     embed.add_field(name="!help", value="You're looking at it.", inline=False)
-    embed.set_footer(text="Bot made for keeping the realm alive and the squad notified.")
+    embed.set_footer(text="Bot made for keeping the realm alive and the peeps notified.")
     await ctx.send(embed=embed)
 
 @tasks.loop(time=datetime.time(hour=3, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=-5))))  # 3AM EST
