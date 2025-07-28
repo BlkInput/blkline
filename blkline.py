@@ -571,7 +571,7 @@ async def say(ctx, channel_input=None, *, message: str = None):
 
 @bot.command(aliases=["sp", "chat"])
 async def speak(ctx, channel_input=None, *, message: str = None):
-    if 1388601551349612695 not in [role.id for role in ctx.author.roles]:
+    if 1399497319052742656 not in [role.id for role in ctx.author.roles]:
         await ctx.send("<:noentry:1388586500756865126> You don't have permission to use this command.")
         return
 
