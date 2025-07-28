@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord.ui import View, Button
 import aiohttp, os, json
 from cogs.utils import UtilsCog
+import challonge
 
 
 MAP_FILE = "data/tourney_map.json"
