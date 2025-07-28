@@ -991,6 +991,25 @@ async def reloadcog(ctx, name: str):
         await ctx.send(f"<:warning:1388586513000042516> Failed to reload: `{e}`")
         print(f"[RELOAD] ❌ Failed to reload cogs.{name}: {e}")
 
+@bot.command(name="reloadall")
+@commands.is_owner()
+async def reload_all(ctx):
+    failed = []
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            name = filename[:-3]
+            try:
+                await bot.reload_extension(f"cogs.{name}")
+                print(f"[RELOAD] ✅ Reloaded cogs.{name}")
+            except Exception as e:
+                failed.append(name)
+                print(f"[RELOAD] ❌ Failed to reload cogs.{name}: {e}")
+
+    if failed:
+        await ctx.send(f"❌ Failed to reload: {', '.join(failed)}")
+    else:
+        await ctx.send("✅ All cogs reloaded.")
+
 @bot.command()
 async def explayers(ctx):
     try:
