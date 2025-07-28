@@ -16,33 +16,7 @@ OPTOUT_FILE = "data/match_ping_optouts.json"
 LOG_CHANNEL_ID = 1390938867128860692
 PLAYER_MAP_FILE = "data/player_map.json"
 
-def load_json(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r") as f:
-        return json.load(f)
 
-def save_json(path, data):
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
-
-def load_player_map():
-    if not os.path.exists(PLAYER_MAP_FILE):
-        return {}
-    with open(PLAYER_MAP_FILE, "r") as f:
-        return json.load(f)
-
-def save_player_map(data):
-    os.makedirs(os.path.dirname(PLAYER_MAP_FILE), exist_ok=True)
-    with open(PLAYER_MAP_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
-def get_participants(self, slug):
-    url = f"https://api.challonge.com/v1/tournaments/{slug}/participants.json"
-    params = {"api_key": CHALLONGE_API_KEY}
-    res = requests.get(url, params=params)
-    res.raise_for_status()
-    return res.json()
 
 class ChallongeCog(commands.Cog):
     def __init__(self, bot):
@@ -60,6 +34,34 @@ class ChallongeCog(commands.Cog):
     def auth(self):
         return aiohttp.BasicAuth(self.username, self.api_key)
 
+    def load_json(path):
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r") as f:
+        return json.load(f)
+
+    def save_json(path, data):
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+    
+    def load_player_map():
+        if not os.path.exists(PLAYER_MAP_FILE):
+            return {}
+        with open(PLAYER_MAP_FILE, "r") as f:
+            return json.load(f)
+    
+    def save_player_map(data):
+        os.makedirs(os.path.dirname(PLAYER_MAP_FILE), exist_ok=True)
+        with open(PLAYER_MAP_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    
+    def get_participants(self, slug):
+        url = f"https://api.challonge.com/v1/tournaments/{slug}/participants.json"
+        params = {"api_key": CHALLONGE_API_KEY}
+        res = requests.get(url, params=params)
+        res.raise_for_status()
+        return res.json()
+        
     async def request(self, method, endpoint, **kwargs):
         url = f"{self.base_url}/{endpoint}.json"
         async with aiohttp.ClientSession(auth=self.auth()) as session:
