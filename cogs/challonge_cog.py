@@ -35,7 +35,14 @@ def save_player_map(data):
     os.makedirs(os.path.dirname(PLAYER_MAP_FILE), exist_ok=True)
     with open(PLAYER_MAP_FILE, "w") as f:
         json.dump(data, f, indent=2)
-        
+
+def get_participants(self, slug):
+    url = f"https://api.challonge.com/v1/tournaments/{slug}/participants.json"
+    params = {"api_key": CHALLONGE_API_KEY}
+    res = requests.get(url, params=params)
+    res.raise_for_status()
+    return res.json()
+
 class ChallongeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
