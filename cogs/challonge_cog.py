@@ -13,6 +13,7 @@ ARCHIVE_FILE = "data/archived_slugs.json"
 ALERT_CACHE = "data/alerted_matches.json"
 OPTOUT_FILE = "data/match_ping_optouts.json"
 LOG_CHANNEL_ID = 1390938867128860692
+PLAYER_MAP_FILE = "data/player_map.json"
 
 def load_json(path):
     if not os.path.exists(path):
@@ -24,6 +25,17 @@ def save_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
+def load_player_map():
+    if not os.path.exists(PLAYER_MAP_FILE):
+        return {}
+    with open(PLAYER_MAP_FILE, "r") as f:
+        return json.load(f)
+
+def save_player_map(data):
+    os.makedirs(os.path.dirname(PLAYER_MAP_FILE), exist_ok=True)
+    with open(PLAYER_MAP_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+        
 class ChallongeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -313,6 +325,51 @@ class ChallongeCog(commands.Cog):
                 await channel.send(" ".join(mentions), embed=embed, view=OptOutView(p1 or p2))
             alert_cache[slug].append(mid)
         save_json(ALERT_CACHE, alert_cache)
+
+    @commands.command(name="addplayer", aliases=["join", "signup"])
+    async def addplayer(self, ctx, *, player_name: str = None):
+        """Add a player to the tournament using a mapped or given name."""
+        if not self.active_tournament_slug:
+            await ctx.send("🚫 No active tournament set. Use `!seed_tourney <slug>` first.")
+            return
+    
+        player_map = load_player_map()
+    
+        if not player_name:
+            # Try mapping from Discord display name
+            key = ctx.author.display_name.strip()
+            player_name = player_map.get(key, key)  # fallback to display name if unmapped
+    
+        try:
+            participant = challonge.participants.create(
+                self.active_tournament_slug,
+                name=player_name
+            )
+            await ctx.send(f"✅ Added `{player_name}` to the tournament.")
+        except challonge.api.ChallongeException as e:
+            await ctx.send(f"❌ Could not add player: {e}")
+
+    @commands.command(name="mapname", aliases=["setname"])
+    async def mapname(self, ctx, *, desired_name: str):
+        """Map your Discord display name to a tournament name."""
+        name = ctx.author.display_name.strip()
+        player_map = load_player_map()
+        player_map[name] = desired_name
+        save_player_map(player_map)
+        await ctx.send(f"🔗 Mapped `{name}` → `{desired_name}` for auto-registration.")
+
+    @commands.command(name="namemap")
+    async def view_name_map(self, ctx):
+        """View all current name mappings."""
+        player_map = load_player_map()
+        if not player_map:
+            await ctx.send("📭 No name mappings have been set yet.")
+            return
+    
+        embed = discord.Embed(title="📇 Player Name Mappings", color=0x00bfa5)
+        for discord_name, mapped_name in player_map.items():
+            embed.add_field(name=discord_name, value=f"→ `{mapped_name}`", inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["mlist"])
     async def match_list(self, ctx, slug: str):
