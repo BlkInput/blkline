@@ -226,6 +226,13 @@ class ChallongeCog(commands.Cog):
         await self.alert_matches(ctx.guild, slug)
         await ctx.send(f"✅ Match alerts manually synced for `{slug}`.")
 
+    @commands.command(name="set_active_slug", aliases=["sas", "s_active"])
+    @commands.is_owner()
+    async def set_active_slug(self, ctx, slug: str):
+        """Force-set the active tournament slug (DEV ONLY)"""
+        self.active_tournament_slug = slug
+        await ctx.send(f"<:checkbox:1388586497984430160> Active slug manually set to `{slug}`.")
+
     @commands.command()
     async def register(self, ctx, slug: str):
         """Link your Discord account to a Challonge participant in the tournament."""
@@ -280,7 +287,7 @@ class ChallongeCog(commands.Cog):
     @commands.command(name="track_slug")
     @commands.has_permissions(administrator=True)
     async def track_slug(self, ctx, slug: str):
-        """Track a new Challonge tournament slug."""
+        """Track a new Challonge tournament slug and set it as active."""
         file_path = "data/tracked_slugs.json"
     
         # Load existing tracked slugs
@@ -300,6 +307,10 @@ class ChallongeCog(commands.Cog):
             with open(file_path, "w") as f:
                 json.dump(data, f, indent=2)
             await ctx.send(f"<:checkbox:1388586497984430160> Now tracking tournament slug: `{slug}`.")
+    
+        # ✅ Set as active for bot session
+        self.active_tournament_slug = slug
+        print(f"[Challonge] Active tournament set to: {slug}")
 
     @tasks.loop(minutes=10)
     async def match_alerts(self):
