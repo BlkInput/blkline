@@ -5,10 +5,15 @@ import time
 import os
 from datetime import datetime, timedelta
 import requests
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 
 LINK_FILE = "data/mc_links.json"
 TIME_FILE = "data/mc_time.json"
-POOL_FILE = "data/credit_pool.json"
+POOL_FILE = "data/exaroton_pool.json"
 PLAYTIME_FILE = "data/playtime_rewards.json"
 REWARD_HISTORY_FILE = "data/reward_history.json"
 DEV_USER_ID = [448896936481652777, 777345438495277076]
@@ -27,70 +32,28 @@ def save_json(file, data):
     with open(file, "w") as f:
         json.dump(data, f, indent=4)
 
+def get_rendered_page(url):
+    options = Options()
+    options.headless = True
+    driver = webdriver.Chrome(options=options)
+    try:
+        driver.get(url)
+        time.sleep(5)
+        return driver.page_source
+    finally:
+        driver.quit()
+
 class RewardsCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.check_playtime.start()
+        pool_data = load_json(POOL_FILE)
+        self.credit_pool_code = load_json(POOL_FILE).get("pool")
+        print(f"[INIT] Loaded pool code: {self.credit_pool_code}")
+        print("[REWARDS] RewardsCog loaded.")
 
     def cog_unload(self):
         self.check_playtime.cancel()
-
-    # -- UUID Linking --
-    @commands.command(name="linkmc", aliases=["uuidlink", "setuuid"])
-    async def linkmc(self, ctx, mc_username: str):
-        user_id = ctx.author.id
-        now = time.time()
-
-        # Cooldown check
-        if user_id not in DEV_USER_ID:
-            last_time = cooldowns.get(user_id, 0)
-            if now - last_time < COOLDOWN_SECONDS:
-                remaining = int(COOLDOWN_SECONDS - (now - last_time))
-                embed = discord.Embed(
-                    title="⏳ Slow down!",
-                    description=f"You're on cooldown. Try again in **{remaining}** seconds.",
-                    color=discord.Color.orange()
-                )
-                embed.set_footer(text="Only devs can bypass this.")
-                await ctx.send(embed=embed)
-                return
-            cooldowns[user_id] = now  # Update cooldown timestamp
-
-        # UUID fetch
-        url = f"https://api.mojang.com/users/profiles/minecraft/{mc_username}"
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            uuid = data["id"]
-            formatted_uuid = f"{uuid[:8]}-{uuid[8:12]}-{uuid[12:16]}-{uuid[16:20]}-{uuid[20:]}"
-
-            links = load_json(LINK_FILE)
-            links[str(user_id)] = {
-                "username": mc_username,
-                "uuid": uuid
-            }
-            save_json(LINK_FILE, links)
-
-            await ctx.send(f"🔗 Successfully linked your account to **{mc_username}**.")
-
-            # Logging
-            log_channel = self.bot.get_channel(MC_LOG_CHANNEL_ID)
-            if log_channel:
-                embed = discord.Embed(
-                    title="📝 Minecraft UUID Linked",
-                    color=discord.Color.blurple()
-                )
-                embed.add_field(name="User", value=f"{ctx.author} ({ctx.author.mention})", inline=False)
-                embed.add_field(name="User ID", value=f"{ctx.author.id}", inline=True)
-                embed.add_field(name="Minecraft Username", value=f"{mc_username}", inline=True)
-                embed.add_field(name="UUID", value=f"`{formatted_uuid}`", inline=False)
-                embed.set_footer(text=f"Submitted in #{ctx.channel}", icon_url=ctx.author.display_avatar.url)
-                embed.timestamp = datetime.utcnow()
-                await log_channel.send(embed=embed)
-        else:
-            await ctx.send(f"❌ Could not find Minecraft user `{mc_username}`. Please double-check spelling.")
-
 
 
     # -- Simulated Playtime Tracker --
@@ -187,6 +150,7 @@ class RewardsCog(commands.Cog):
     @commands.command(name="pooladd")
     @commands.has_permissions(administrator=True)
     async def pooladd(self, ctx, amount: float):
+        print(f"[POOLADD] Triggered by {ctx.author} from instance id: {id(self)}")
         pool = load_json(POOL_FILE)
         pool["credits"] = pool.get("credits", 0.0) + amount
         save_json(POOL_FILE, pool)
@@ -422,31 +386,108 @@ class RewardsCog(commands.Cog):
             await log_channel.send(embed=embed)
 
     # -- Pool Credits Check --
-    @commands.command(name="pool", aliases=["creditpool", "donorpool"])
-    async def credit_pool(self, ctx):
-        pool_data = load_json(POOL_FILE)
-        pool_code = pool_data.get("pool")
+    @commands.command(name="credpool", aliases=["creditpool", "donorpool"])
+    async def show_cached_credits(self, ctx):
+        pool_code = getattr(self, "credit_pool_code", None) or load_json(POOL_FILE).get("pool")
         if not pool_code:
             await ctx.send("<:warning:1388586513000042516> No pool code has been set. Use `!setpool <code>`.")
             return
 
         try:
-            response = requests.get(f"https://exaroton.com/pools/{pool_code}")
-            if response.status_code != 200:
-                await ctx.send("❌ Could not fetch pool data from Exaroton.")
-                return
+            url = f"https://exaroton.com/pools/{pool_code}"
+            headers = {"User-Agent": "Mozilla/5.0"}
+            html = requests.get(url, headers=headers).text
+            soup = BeautifulSoup(html, "html.parser")
+            credit_element = soup.find("div", class_="credits")
 
-            # Cheeky scrape of the balance from HTML
-            import re
-            match = re.search(r'(\d+\.\d+)\s*credits?', response.text)
-            if match:
-                balance = float(match.group(1))
-                await ctx.send(f"💰 Current server credit pool balance: **{balance:.2f}** credits.")
+            if not credit_element:
+                raise ValueError("Could not find credit balance on the page.")
+
+            credits = float(credit_element.text.strip().replace("credits", "").strip())
+
+            if credits is None:
+                raise ValueError("Missing 'credits' key")
+
+            await ctx.send(f"💰 Current server credit pool balance: **{credits:.2f}** credits.")
+        except Exception as e:
+            await ctx.send(f"<:warning:1388586513000042516> Failed to fetch pool info: {e}")
+
+    @commands.command(name="poolcached", aliases=["pooloffline", "poolbackup"])
+    async def cached_pool(self, ctx):
+        """Show the last saved pool balance from local JSON."""
+        pool_data = load_json(POOL_FILE)
+        credits = pool_data.get("credits", None)
+        if credits is None:
+            await ctx.send("📂 No cached credit balance found.")
+        else:
+            await ctx.send(f"📦 Cached pool balance: **{credits:.2f}** credits.")
+
+    @commands.command(name="poolcheck")
+    async def poolcheck(self, ctx):
+        """Compare memory vs file pool code, and check live vs cached balance."""
+        embed = discord.Embed(title="<:report:1388586505693302968> Pool Check Diagnostic", color=0x00bfa5)
+
+        # Step 1: Check memory
+        memory_code = getattr(self, "credit_pool_code", None)
+        embed.add_field(name="Memory Pool Code", value=f"`{memory_code}`" if memory_code else "❌ None", inline=True)
+
+        # Step 2: Check file
+        try:
+            file_data = load_json(POOL_FILE)
+            file_code = file_data.get("pool")
+            cached_credits = file_data.get("credits")
+            embed.add_field(name="File Pool Code", value=f"`{file_code}`" if file_code else "❌ None", inline=True)
+        except Exception as e:
+            embed.add_field(name="File Read Error", value=f"❌ `{e}`", inline=False)
+            return await ctx.send(embed=embed)
+
+        # Step 3: Choose a pool code
+        pool_code = memory_code or file_code
+        if not pool_code:
+            embed.color = 0xff0000
+            embed.description = "🚫 No pool code set in memory or file.\nUse `!setpool <code>` to initialize."
+            return await ctx.send(embed=embed)
+
+        # Step 4: Fetch and parse Exaroton pool page
+        try:
+            html = get_rendered_page(f"https://exaroton.com/pools/{pool_code}")
+
+
+            # DEBUG: Save the full page to inspect
+            with open("exaroton_pool_debug.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            print("[DEBUG] HTML Selenium saved")
+
+            soup = BeautifulSoup(html, "html.parser")
+            credit_element = soup.find("div", class_="credits")
+
+            if not credit_element:
+                raise ValueError("Could not find credit balance on the page.")
+
+            live_credits = float(credit_element.text.strip().replace("credits", "").strip())
+            embed.add_field(name="Live Balance", value=f"💳 **{live_credits:.2f}** credits", inline=True)
+
+            if cached_credits is not None:
+                diff = round(live_credits - cached_credits, 2)
+                status = "📈 Increased" if diff > 0 else "📉 Decreased" if diff < 0 else "⏸ No Change"
+                embed.add_field(name="Cached Balance", value=f"🗃️ {cached_credits:.2f} credits", inline=True)
+                embed.add_field(name="Δ Change", value=f"`{diff:+.2f}` ({status})", inline=False)
             else:
-                await ctx.send("❌ Couldn't find a credit balance on the page.")
+                embed.set_footer(text="No cached balance to compare.")
+
+            # 🔄 Update local file
+            file_data["credits"] = live_credits
+            save_json(POOL_FILE, file_data)
 
         except Exception as e:
-            await ctx.send(f"<:warning:1388586513000042516> Error checking pool balance: `{e}`")
+            embed.add_field(name="Live Fetch Error", value=f"❌ `{e}`", inline=False)
+            embed.color = 0xff9900
+
+        finally:
+            driver.quit()
+
+        await ctx.send(embed=embed)
+
 
 
 async def setup(bot):

@@ -14,6 +14,7 @@ from playwright.async_api import async_playwright
 from discord.ui import View, Button
 from discord import ButtonStyle
 
+
 DATA_FILE = "data/exaroton_data.json"
 POOL_FILE = "data/exaroton_pool.json"
 DONOR_FILE = "data/exaroton_donations.json"
@@ -42,6 +43,13 @@ def save_json(file, data):
         os.makedirs(os.path.dirname(file), exist_ok=True)
         with open(file, "w") as f:
             json.dump(data, f, indent=4)
+
+
+def load_json(file):
+    if not os.path.exists(file):
+        return {}
+    with open(file, "r") as f:
+        return json.load(f)
 
 
 class ConfirmNukeView(View):
@@ -114,6 +122,7 @@ class DonateButton(discord.ui.View):
 class ExarotonCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.credit_pool_code = load_json(POOL_FILE).get("pool")
         self.credit_balance = load_data(DATA_FILE).get("balance", 0.0)
         self.server_address = os.getenv("SERVER_ADDRESS")
         self.channel_id = int(os.getenv("CHANNEL_ID"))
@@ -270,6 +279,16 @@ class ExarotonCog(commands.Cog):
         status_text = status_text or "Unknown"
         print(f"[Final Status Source]: {source} | Players: {players}")
         return motd.strip(), players, online, status_text, max_players, source
+
+    @commands.command(name="reloadpool")
+    async def reload_pool(self, ctx):
+        """Reload credit pool code from disk into memory."""
+        try:
+            file_data = load_json(POOL_FILE)
+            self.credit_pool_code = file_data.get("pool")
+            await ctx.send(f"<:checkbox:1388586497984430160> Reloaded pool code into memory: `{self.credit_pool_code}`")
+        except Exception as e:
+            await ctx.send(f"❌ Failed to reload pool: `{e}`")
 
 
     @commands.command(name="refreshserverstatus", aliases=["refreshstatus", "rfs"])
@@ -958,8 +977,21 @@ class ExarotonCog(commands.Cog):
     @commands.is_owner()
     async def setpool(self, ctx, pool_code: str):
         pool_code_clean = pool_code.strip("#")
-        save_json(POOL_FILE, {"pool": pool_code_clean})  # ✅ Persist to disk
+        self.credit_pool_code = pool_code_clean
+
+        # Confirm save path
+        # await ctx.send(f"🔍 Saving to: `{POOL_FILE}` with code `{pool_code_clean}`")
+
+        try:
+            os.makedirs(os.path.dirname(POOL_FILE), exist_ok=True)
+            with open(POOL_FILE, "w") as f:
+                json.dump({"pool": pool_code_clean}, f, indent=4)
+        except Exception as e:
+            await ctx.send(f"❌ Save failed: {e}")
+            return
+
         await ctx.send(f"<:checkbox:1388586497984430160> Credit pool code set to `{pool_code_clean}`.")
+
 
     @commands.command()
     async def debugpool(self, ctx):

@@ -95,7 +95,7 @@ async def check_server_status():
                 players = ', '.join([player.name for player in status.players.sample]) if status.players.sample else "Unknown players"
                 embed.add_field(name="Who's Online", value=players, inline=False)
 
-            embed.set_footer(text="Summon the peeps before Obscure falls asleep.")
+            embed.set_footer(text="Summon the peeps before Obscura falls asleep.")
             await channel.send(content=ROLE_TO_TAG, embed=embed)
             last_status = "online"
         else:
@@ -105,7 +105,7 @@ async def check_server_status():
         if last_status == "online":
             embed = discord.Embed(title="**Obscura is OFFLINE or SLEEPING**", color=0xff5555)
             embed.set_footer(text="Someone needs to manually start it or join to wake it up.")
-            await channel.send(content="<@&1368225900486721616>", embed=embed)
+            await channel.send(content="<@&1390934094602571857>", embed=embed)
         last_status = "offline"
 
 @commands.command(name="mcstatus", aliases=["mcserverstatus"])
