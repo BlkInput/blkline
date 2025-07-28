@@ -577,6 +577,32 @@ class ChallongeCog(commands.Cog):
         else:
             await ctx.send(f"❌ Failed to confirm result: {data.get('errors') or data}")
 
+    @commands.command(name="whoami")
+    async def whoami(self, ctx, slug: str):
+        """Find your participant ID for a tournament."""
+        user_name = ctx.author.display_name.lower()
+        try:
+            participants = self.get_participants(slug)
+        except Exception as e:
+            return await ctx.send(f"❌ Failed to fetch participants: `{e}`")
+    
+        # Try to match by display name or username
+        matches = []
+        for p in participants:
+            name = p["participant"]["name"].lower()
+            if user_name in name or ctx.author.name.lower() in name:
+                matches.append((p["participant"]["id"], p["participant"]["name"]))
+    
+        if not matches:
+            return await ctx.send(f"🔍 No participant matches found for `{ctx.author.display_name}` in `{slug}`.")
+    
+        msg = f"👤 Matches for **{ctx.author.display_name}** in `{slug}`:\n"
+        for pid, pname in matches:
+            msg += f"• `{pname}` — ID: `{pid}`\n"
+        msg += "\nUse `!bind <slug> <participant_id>` to link yourself."
+    
+        await ctx.send(msg)
+
     @commands.command(aliases=["ct", "ctour", "newtour"])
     @commands.is_owner()
     async def create_tourney(self, ctx, slug: str, t_type: str = "single", *, tail: str = ""):
