@@ -980,14 +980,16 @@ if not os.path.exists(challenge_file):
     with open(challenge_file, "w") as f:
         json.dump({}, f)
 
-@bot.command()
+@bot.command(name="reloadcog", help="Reload a specific cog from /cogs/")
 @commands.is_owner()
 async def reloadcog(ctx, name: str):
     try:
         await bot.reload_extension(f"cogs.{name}")
         await ctx.send(f"<:checkbox:1388586497984430160> Reloaded cog: `{name}`")
+        print(f"[RELOAD] ✅ Successfully reloaded: cogs.{name}")
     except Exception as e:
         await ctx.send(f"<:warning:1388586513000042516> Failed to reload: `{e}`")
+        print(f"[RELOAD] ❌ Failed to reload cogs.{name}: {e}")
 
 @bot.command()
 async def explayers(ctx):
