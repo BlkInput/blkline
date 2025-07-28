@@ -379,6 +379,14 @@ class ChallongeCog(commands.Cog):
             alert_cache[slug].append(mid)
         save_json(ALERT_CACHE, alert_cache)
 
+    @commands.command(name="seed_tourney", aliases=["set_active_slug"])
+    @commands.has_permissions(administrator=True)
+    async def seed_tourney(self, ctx, slug: str):
+        """Seeds or activates the given tournament slug."""
+        slug = slug.lower()
+        self.active_tournament_slug = slug
+        await ctx.send(f"<:checkbox:1388586497984430160> Active slug manually set to: `{slug}`")
+
     @commands.command(name="addplayer", aliases=["join", "signup"])
     async def addplayer(self, ctx, *, player_name: str = None):
         """Add a player to the tournament using a mapped or given name."""
