@@ -273,15 +273,23 @@ class ChallongeCog(commands.Cog):
 
     @commands.command(aliases=["slugs", "tlist"])
     async def list_slugs(self, ctx):
-        tourney_map = load_json(MAP_FILE)
-        if not tourney_map:
+        file_path = "data/tracked_slugs.json"
+        if not os.path.exists(file_path):
             await ctx.send("🗂️ No tournaments found.")
             return
-
+    
+        with open(file_path, "r") as f:
+            data = json.load(f)
+    
+        tournaments = data.get("tournaments", [])
+        if not tournaments:
+            await ctx.send("🗂️ No tournaments found.")
+            return
+    
         embed = discord.Embed(title="📋 Tracked Tournament Slugs", color=0x5865f2)
-        for slug in tourney_map:
-            embed.add_field(name=slug, value=f"{len(tourney_map[slug])} players", inline=False)
-
+        for slug in tournaments:
+            embed.add_field(name=slug, value="👥 Not yet mapped to players", inline=False)
+    
         await ctx.send(embed=embed)
 
     @commands.command(name="track_slug")
