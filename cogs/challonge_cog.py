@@ -275,6 +275,30 @@ class ChallongeCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(name="track_slug")
+    @commands.has_permissions(administrator=True)
+    async def track_slug(self, ctx, slug: str):
+        """Track a new Challonge tournament slug."""
+        file_path = "data/tracked_slugs.json"
+    
+        # Load existing tracked slugs
+        if not os.path.exists(file_path):
+            data = {"tournaments": []}
+        else:
+            with open(file_path, "r") as f:
+                data = json.load(f)
+    
+        slug = slug.lower()
+    
+        # Add slug if not already tracked
+        if slug in data["tournaments"]:
+            await ctx.send(f"⚠️ Slug `{slug}` is already being tracked.")
+        else:
+            data["tournaments"].append(slug)
+            with open(file_path, "w") as f:
+                json.dump(data, f, indent=2)
+            await ctx.send(f"<:checkbox:1388586497984430160> Now tracking tournament slug: `{slug}`.")
+
     @tasks.loop(minutes=10)
     async def match_alerts(self):
         for guild in self.bot.guilds:
