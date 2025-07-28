@@ -49,6 +49,8 @@ class ChallongeCog(commands.Cog):
         self.api_key = os.getenv("CHALLONGE_API_KEY")
         self.username = os.getenv("CHALLONGE_USERNAME")
         self.base_url = "https://api.challonge.com/v1"
+        self.active_tournament_slug = None
+        self.participant_map = {}
         self.match_alerts.start()
 
     def cog_unload(self):
